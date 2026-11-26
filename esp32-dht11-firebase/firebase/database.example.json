@@ -1,0 +1,11 @@
+{
+  "devices": {
+    "esp32-01": {
+      "temperature": 0,
+      "humidity": 0,
+      "timestamp": 0,
+      "relay": false,
+      "history": {}
+    }
+  }
+}

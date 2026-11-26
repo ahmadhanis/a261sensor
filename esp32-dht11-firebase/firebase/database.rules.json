@@ -1,0 +1,50 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "devices": {
+      "$deviceId": {
+        "temperature": {
+          ".read": true,
+          ".write": true,
+          ".validate": "newData.isNumber()"
+        },
+        "humidity": {
+          ".read": true,
+          ".write": true,
+          ".validate": "newData.isNumber()"
+        },
+        "timestamp": {
+          ".read": true,
+          ".write": true,
+          ".validate": "newData.isNumber()"
+        },
+        "relay": {
+          ".read": true,
+          ".write": true,
+          ".validate": "newData.isBoolean()"
+        },
+        "history": {
+          ".read": true,
+          ".indexOn": ["timestamp"],
+          "$timestamp": {
+            ".write": true,
+            ".validate": "newData.hasChildren(['temperature', 'humidity', 'timestamp'])",
+            "temperature": {
+              ".validate": "newData.isNumber()"
+            },
+            "humidity": {
+              ".validate": "newData.isNumber()"
+            },
+            "timestamp": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+# PlatformIO and generated firmware
+.pio/
+build/
+arduino/**/*.ino.cpp
+*.o
+*.a
+*.elf
+*.bin
+*.hex
+*.map
+
+# Local credentials (keep example configuration files)
+.env
+.env.*
+!.env.example
+arduino/**/firebase_device_config.h
+arduino/**/secrets.h
+arduino/**/credentials.h
+service-account*.json
+*-firebase-adminsdk-*.json
+*.key
+
+# Dashboard dependencies, generated server output, and Sites workspaces
+node_modules/
+dashboard/dist/server/
+.sites-runtime/
+.sites-checkout/
+.sites-checkout-*/
+coverage/
+.cache/
+
+# Temporary files and operating-system metadata
+*.log
+*.tmp
+*.bak
+*~
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# dashboard/dist contains the HTML/CSS/JS source and must remain tracked.

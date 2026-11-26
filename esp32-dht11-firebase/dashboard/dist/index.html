@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12241f">
+  <meta name="description" content="Live ESP32 temperature, humidity, historical readings, and relay control.">
+  <title>Fieldwork — ESP32 dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%2312241f'/%3E%3Cpath d='M14 32V16h20M14 24h15' fill='none' stroke='%239fe6be' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+  <script type="module" src="analytics.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+  <aside class="sidebar">
+    <a href="#overview" class="brand"><span class="brand-mark" aria-hidden="true">f.</span><span>fieldwork<span class="brand-subtitle">SENSOR CONSOLE</span></span></a>
+    <div class="workspace-label">WORKSPACE</div>
+    <nav aria-label="Main navigation">
+      <a class="nav-item active" href="#overview"><span aria-hidden="true">◫</span> Overview</a>
+      <a class="nav-item" href="#history"><span aria-hidden="true">◷</span> Reading history</a>
+      <a class="nav-item" href="#device-settings"><span aria-hidden="true">⚙</span> Device settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="hardware-symbol" aria-hidden="true">⌁</div>
+      <strong>A little more connected.</strong>
+      <p>Your environment, one reading at a time.</p>
+      <div class="sidebar-footer">ESP32 + DHT11 <span>FIREBASE</span></div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <header class="topbar"><div class="breadcrumb">Workspace <span>/</span> Overview</div><span class="connection" id="connection"><i></i><span id="connection-text">Connecting</span></span></header>
+    <div class="content" id="overview">
+      <section class="page-heading">
+        <div><div class="eyebrow">YOUR SPACE, AT A GLANCE</div><h1>Environment overview<span>.</span></h1><p>Stay close to your environment. Take control when you need to.</p></div>
+        <button class="button secondary" id="refresh" type="button"><span class="refresh-icon" aria-hidden="true">↻</span> Refresh</button>
+      </section>
+
+      <section class="device-bar" id="device-settings" aria-label="Device settings">
+        <form id="device-form"><label for="device-id">Device</label><div class="input-group"><span class="device-icon" aria-hidden="true">▣</span><input id="device-id" name="device" value="esp32-01" pattern="[A-Za-z0-9_-]+" maxlength="64" required autocomplete="off" spellcheck="false" aria-describedby="device-help"><button type="submit" class="button small">Connect</button></div></form>
+        <span class="device-help" id="device-help">Enter the ID from your Arduino sketch.</span>
+        <button type="button" class="auto-refresh" id="auto-refresh" aria-pressed="true"><span class="auto-dot" aria-hidden="true"></span><span id="auto-label">Auto-refresh on</span><span class="interval">5s</span></button>
+      </section>
+
+      <div id="notice" class="notice" role="status" hidden></div>
+      <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+
+      <section class="metrics" aria-label="Current readings">
+        <article class="card metric-card temperature-card"><div class="card-top"><span>Temperature</span><span class="metric-icon orange" aria-hidden="true">♨</span></div><div class="metric-value"><span id="temperature">—</span><span class="unit">°C</span></div><div class="metric-bottom"><span class="measurement-tag orange-tag">DHT11</span><span>Ambient temperature</span></div></article>
+        <article class="card metric-card humidity-card"><div class="card-top"><span>Humidity</span><span class="metric-icon blue" aria-hidden="true">♧</span></div><div class="metric-value"><span id="humidity">—</span><span class="unit">%</span></div><div class="metric-bottom"><span class="measurement-tag blue-tag">DHT11</span><span>Relative humidity</span></div></article>
+        <article class="card relay-card" aria-labelledby="relay-title"><div class="card-top"><span id="relay-title">Relay control</span><span class="relay-pin">D18</span></div><div class="relay-heading"><strong id="relay-value">Unknown</strong><span class="relay-indicator" id="relay-indicator" aria-hidden="true"></span></div><div class="relay-buttons" role="group" aria-label="Set relay command"><button type="button" id="relay-off" aria-pressed="false" disabled>OFF</button><button type="button" id="relay-on" aria-pressed="false" disabled>ON</button></div><p id="relay-help">Reading stored command…</p></article>
+      </section>
+
+      <section class="card ai-card" id="ai-insights" aria-labelledby="ai-title">
+        <div class="section-heading ai-heading"><div class="ai-title-group"><span class="ai-spark" aria-hidden="true">✧</span><div><h2 id="ai-title">A second look, with Gemini</h2><p>Turn recent readings into a clearer picture.</p></div></div><button class="button" id="analyze-readings" type="button" disabled><span aria-hidden="true">✧</span> Analyze readings</button></div>
+        <div class="ai-scope"><span class="ai-label">SELECTED SNAPSHOT</span><span id="ai-scope">Waiting for saved readings</span><span class="ai-model">Gemini 3.5 Flash-Lite</span></div>
+        <div class="ai-error" id="ai-error" role="alert" hidden></div>
+        <div class="ai-empty" id="ai-empty"><div><h3>Patterns worth paying attention to.</h3><p id="ai-empty-text">Gemini can summarize temperature and humidity trends, highlight unusual changes, and suggest practical checks.</p></div><div class="ai-topics"><span>Observed trends</span><span>Unusual changes</span><span>Data quality</span></div></div>
+        <div class="ai-loading" id="ai-loading" role="status" hidden><span class="ai-spinner" aria-hidden="true"></span><div><strong>Reviewing your readings…</strong><p>Looking at measured changes, sampling gaps, and recent trends.</p></div></div>
+        <div class="ai-report" id="ai-report" hidden>
+          <div class="ai-summary"><span class="ai-label">THE OVERVIEW</span><p id="ai-summary"></p></div>
+          <div class="ai-trends"><article><h3>Temperature trend</h3><p id="ai-temperature-trend"></p></article><article><h3>Humidity trend</h3><p id="ai-humidity-trend"></p></article></div>
+          <div class="ai-lists"><article><h3>Unusual changes</h3><ul id="ai-anomalies"></ul></article><article><h3>Suggested checks</h3><ul id="ai-recommendations"></ul></article><article><h3>Data notes</h3><ul id="ai-limitations"></ul></article></div>
+          <div class="ai-report-meta" id="ai-report-meta"></div>
+        </div>
+        <div class="ai-footer"><p id="ai-status" role="status">At least 3 saved readings are needed. Analysis runs only when requested and sends the selected readings to Google Gemini.</p><details class="ai-setup"><summary>Firebase AI setup</summary><p>In <a href="https://console.firebase.google.com/project/ai-projects-abf22/ailogic" target="_blank" rel="noopener noreferrer">your Firebase AI Logic console</a>, complete Get started and select Gemini Developer API. If App Check is enforced, configure the public reCAPTCHA Enterprise site key in <code>firebase-client.js</code>. No separate Gemini API key belongs in this page.</p></details></div>
+      </section>
+
+      <section class="middle-grid">
+        <article class="card chart-card" aria-labelledby="chart-title">
+          <div class="section-heading"><div><h2 id="chart-title">The bigger picture</h2><p>How your environment changes over time.</p></div><label class="select-wrap"><span class="sr-only">History limit</span><select id="history-limit"><option value="100">Last 100 readings</option><option value="300">Last 300 readings</option><option value="1000">Last 1,000 readings</option></select></label></div>
+          <div class="chart-toolbar"><div class="segmented" role="group" aria-label="Chart measurement"><button class="selected" id="chart-temperature" type="button" aria-pressed="true">Temperature</button><button id="chart-humidity" type="button" aria-pressed="false">Humidity</button></div><span id="chart-unit">TEMPERATURE · °C</span></div>
+          <div class="chart-container"><svg id="history-chart" viewBox="0 0 800 270" role="img" aria-label="Temperature history chart" preserveAspectRatio="xMidYMid meet"></svg><div class="chart-empty" id="chart-empty"><span aria-hidden="true">⌁</span><strong>Waiting for your first reading</strong><p>Saved readings will appear here automatically.</p></div></div>
+          <div class="chart-footer"><div><span class="legend-dot" id="legend-dot"></span><span id="chart-caption">Temperature</span></div><span id="chart-summary">No historical readings yet</span></div>
+        </article>
+        <article class="card device-card"><div class="section-heading"><div><h2>Device snapshot</h2><p>Small device. Useful insights.</p></div></div><div class="device-art" aria-hidden="true"><div class="chip"><span>ESP32</span><div class="chip-lines"><i></i><i></i><i></i></div><small>CONNECTED THINGS</small></div><span class="device-art-label">DHT11 + RELAY</span></div><dl class="device-details"><div><dt>Device ID</dt><dd id="snapshot-id">esp32-01</dd></div><div><dt>Wi-Fi network</dt><dd>myUUM_Guest</dd></div><div><dt>Sensor / relay pin</dt><dd>D4 / D18</dd></div><div><dt>Last reading</dt><dd id="reading-age">Waiting</dd></div></dl><div class="last-update"><span class="update-icon" aria-hidden="true">◷</span><div><span>LAST SENSOR UPDATE</span><strong id="last-update">No timestamp yet</strong></div></div></article>
+      </section>
+
+      <section class="card history-card" id="history" aria-labelledby="history-title"><div class="section-heading"><div><h2 id="history-title">Reading history</h2><p id="history-caption">A closer look at the readings your device has saved.</p></div><button class="button secondary" id="export-csv" type="button" disabled><span aria-hidden="true">⇩</span> Export CSV</button></div><div class="table-scroll"><table><thead><tr><th scope="col">Date &amp; time <span id="timezone"></span></th><th scope="col">Temperature</th><th scope="col">Humidity</th><th scope="col">Device</th></tr></thead><tbody id="history-body"><tr><td colspan="4" class="table-empty">Waiting for saved readings…</td></tr></tbody></table></div><div class="table-footer"><span id="table-count">0 readings</span><button type="button" class="text-button" id="show-more" hidden>Show more readings</button><span class="newest-label">Newest first</span></div></section>
+      <footer class="page-footer"><span><span class="footer-mark">f.</span> Built for the things around you.</span><span>Firebase Realtime Database <span class="footer-separator">·</span> <span id="refresh-time">Not refreshed yet</span></span></footer>
+    </div>
+  </main>
+</body>
+</html>

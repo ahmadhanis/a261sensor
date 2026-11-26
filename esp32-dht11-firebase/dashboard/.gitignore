@@ -1,0 +1,25 @@
+# Local credentials (this file also applies in the standalone Sites repository)
+.env
+.env.*
+!.env.example
+service-account*.json
+*-firebase-adminsdk-*.json
+*.key
+
+# Dependencies and generated files; keep the static HTML/CSS/JS in dist/
+node_modules/
+dist/server/
+coverage/
+.cache/
+.sites-runtime/
+.sites-checkout/
+.sites-checkout-*/
+
+# Local logs and temporary files
+*.log
+*.tmp
+*.bak
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
