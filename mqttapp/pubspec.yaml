@@ -1,0 +1,20 @@
+name: mqttapp
+description: "A simple MQTT sensor dashboard for ESP32 telemetry."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mqtt_client: ^10.14.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
